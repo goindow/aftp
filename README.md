@@ -13,7 +13,7 @@ FTP 客户端非交互式命令行脚本
 ## 依赖说明
 - ftp
 
-## 
+## 使用说明
 ```shell
 Usage: aftp COMMAND [OPTS...] [ARGS...]
 
