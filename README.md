@@ -25,7 +25,7 @@ Commands:
   exec            Execute the command on the FTP server
   ls              List the contents of FTP server directory
 
-Run 'aftp help COMMAND' for more details on a command.               Copy the ssh-key to one or more sessions
+Run 'aftp help COMMAND' for more details on a command.
 ```
 
 ## 批量上传
