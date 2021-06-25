@@ -123,17 +123,18 @@ function args() {
 }
 
 function opts_lr() {
+  test $# -lt 1 && dialog error 'Requires at least one file as the argument.'
   test -z $ftp_local && dialog error 'Requires an option -l, specify the local working directory.'
   test -z $ftp_remote && dialog error 'Requires an option -r, specify the remote working directory.'
 }
 
 function opts_m() {
-  test -z $mode && return
-  array_has $mode ascii binary && ftp_transfer_mode=$mode || dialog error 'Invalid value for option -m, the transfer mode only be acsii or binary.'
+  test -z $1 && return
+  array_has $1 ascii binary && ftp_transfer_mode=$1 || dialog error 'Invalid value for option -m, the transfer mode only be acsii or binary.'
 }
 
 # getopts 解析
-# $@, 参数(opts... args...), -h host [-p port] -u user [-p password] args...
+# $@, opts... args...
 # @return $?, 调用方 shift 剔除 getopts 参数数量
 function opts() {
   while getopts 'h:p:u:P:l:r:m:' options; do
@@ -192,7 +193,7 @@ EOF
 # aftp push -h host [-p port] -u user [-P password] [-m transfer_mode] -l local_directory -r remote_directory files...
 function push() {
   opts $@ || shift $?
-  opts_lr
+  opts_lr $@
   ftp -inp << EOF &> /dev/null
 open $ftp_host $ftp_port
 user $ftp_user $ftp_pass
@@ -203,14 +204,13 @@ mput $(args $@)
 close
 bye
 EOF
-  dialog ok
 }
 
 # 批量下载
 # aftp pull -h host [-p port] -u user [-P password] [-m transfer_mode] -l local_directory -r remote_directory files...
 function pull() {
   opts $@ || shift $?
-  opts_lr
+  opts_lr $@
   ftp -inp << EOF &> /dev/null
 open $ftp_host $ftp_port
 user $ftp_user $ftp_pass
@@ -221,7 +221,6 @@ mget $(args $@)
 close
 bye
 EOF
-  dialog ok
 }
 
 function help() {
