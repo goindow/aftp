@@ -161,7 +161,7 @@ function opts() {
 }
 
 # 列出文件和目录
-# ./aftp.sh ls -h 10.20.11.46 -p 21 -u ftp1 -P 123456 /data/
+# aftp ls -h host [-p port] -u user [-P password] [DIR(default /)]
 function ls() {
   opts $@ || shift $?
   ftp -inp << EOF
@@ -175,11 +175,7 @@ EOF
 }
 
 # 执行 ftp 命令
-# ./aftp.sh exec -h 10.20.11.46 -p 21 -u ftp1 -P 123456 pwd
-# ftp -inp
-#   -i, do not prompt during multiple file transfers(prompt)
-#   -n, do not automatically login to the remote system(user $user $password)
-#   -p, enable passive mode transfer
+# aftp exec -h host [-p port] -u user [-P password] COMMAND
 function exec() {
   opts $@ || shift $?
   test $# -le 0 && dialog error 'Requires one command as the argument.'
@@ -192,14 +188,8 @@ bye
 EOF
 }
 
-# 批量上传文件
-# aftp push -h host [-p port] -u user [-P password] -l local -r remote files...
-#
-# ./aftp.sh push -h 10.20.11.46 -p 21 -u ftp1 -P 123456 -l /usr/local/var/sh/workspace/aftp/test/send/ -r /data/ 1.data
-# 使用通配符，必须放在引号内，避免被提前扩展，如 "*.data"，否则通配符将被扩展，并且是基于当前目录的，而不是 ftp_local 本地工作目录
-# ./aftp.sh push -h 10.20.11.46 -p 21 -u ftp1 -P 123456 -l /usr/local/var/sh/workspace/aftp/test/send/ -r / "*"
-# 使用 binary 传输模式上传
-# ./aftp.sh push -h 10.20.11.46 -p 21 -u ftp1 -P 123456 -l /usr/local/var/sh/workspace/aftp/test/send/ -r / -m binary test.png
+# 批量上传
+# aftp push -h host [-p port] -u user [-P password] [-m transfer_mode] -l local_directory -r remote_directory files...
 function push() {
   opts $@ || shift $?
   opts_lr
@@ -216,12 +206,8 @@ EOF
   dialog ok
 }
 
-# 批量下载文件
-# ./aftp.sh pull -h 10.20.11.46 -p 21 -u ftp1 -P 123456 -l /usr/local/var/sh/workspace/aftp/test/recv/ -r /data/ 1.data
-# 使用通配符，必须放在引号内，避免被提前扩展，如 "*.data"，否则通配符将被扩展，并且是基于当前目录的，而不是 ftp_remote 远程工作目录
-# ./aftp.sh pull -h 10.20.11.46 -p 21 -u ftp1 -P 123456 -l /usr/local/var/sh/workspace/aftp/test/recv/ -r / "*"
-# 使用 binary 传输模式下载
-# ./aftp.sh pull -h 10.20.11.46 -p 21 -u ftp1 -P 123456 -l /usr/local/var/sh/workspace/aftp/test/recv/ -r / -m binary test.png
+# 批量下载
+# aftp pull -h host [-p port] -u user [-P password] [-m transfer_mode] -l local_directory -r remote_directory files...
 function pull() {
   opts $@ || shift $?
   opts_lr
