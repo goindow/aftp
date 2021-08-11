@@ -1,7 +1,5 @@
 #!/bin/bash
 set -f
-# 配置文件，指定下列配置默认值，若命令行中传递对应参数则覆盖配置文件中相应的配置
-fpt_conf=
 # 认证信息
 ftp_host=
 ftp_port=21
