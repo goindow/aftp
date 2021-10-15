@@ -13,6 +13,23 @@ FTP 客户端非交互式命令行脚本
 ## 依赖说明
 - ftp
 
+## 常见问题
+- 使用 cron 定时调用该脚本下载文件时，如果文件超过 28M，文件下载中断（或不完整）问题
+> 导致该问题的本质原因是 TCP 连接被操作系统超时关闭了。由于文件较大，下载时间较长，在这段时间内两端又没有任何交流，操作系统认为该 TCP 连接已无必要维持，故断开连接导致文件下载中断（或不完整）
+解决为题的思路就是，保证 TCP 连接处于活跃状态不被操作系统断开，需要修改操作系统内核参数，如下
+```shell
+# 修改内核参数
+vim /etc/sysctl.conf
+>net.ipv4.tcp_keepalive_time = 30       # 每间隔 30s 向对端发送一个 keepalive 心跳包，默认 7200s
+net.ipv4.tcp_keepalive_intvl = 10       # 在发送 keepalive 心跳包后，如果没有接收到对端的确认包。则每间隔 10 秒继续发送 keepalive 心跳包，一共发送 tcp_keepalive_probes 次，默认 75s
+net.ipv4.tcp_keepalive_probes = 6       # 在发送 keepalive 心跳包后，如果没有接收到对端的确认包。则每间隔 tcp_keepalive_intvl 秒继续发送 keepalive 心跳包，一共发送 6 次，默认 9 次
+`上面配置合起的意思就是，如果 TCP keepalive 保活功能开启，那么 TCP 连接建立后，每隔 30s 发送一个心跳包，如果对端没有回复，则继续每隔 10s 发送一次心跳包，重复 6 次如果还没有回复，则断开 TCP 连接。只要 TCP 两端之间有数据包交换，各自都会重置该连接上次接收数据包的时间，keepalive心跳包就可以不断刷新这个时间，来避免超时，可以在 C/S 的任意一端或两端都开启 keepalive 保护功能`
+
+
+# 载入 sysctl 配置文件（重载内核配置，使上述改动生效）
+sysctl -p
+```
+
 ## 使用说明
 ```shell
 Usage: aftp COMMAND [OPTS...] [ARGS...]
