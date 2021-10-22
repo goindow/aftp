@@ -22,14 +22,14 @@ FTP 客户端非交互式命令行脚本
 **解决问题的思路就是，保证 TCP 连接处于活跃状态而不被操作系统断开，需要修改 TCP keepalive 相关内核参数，如下**
 ```shell
 # vim /etc/sysctl.conf                  # 修改 TCP keepalive 相关内核参数
-net.ipv4.tcp_keepalive_time = 30        # 每间隔 30s 向对端发送一个 keepalive 心跳包，默认 7200s
+net.ipv4.tcp_keepalive_time = 15        # 每间隔 15s 向对端发送一个 keepalive 心跳包，默认 7200s
 net.ipv4.tcp_keepalive_intvl = 10       # 在发送 keepalive 心跳包后，如果没有接收到对端的确认包。则每间隔 10 秒继续发送 keepalive 心跳包，一共发送 tcp_keepalive_probes 次，默认 75s
-net.ipv4.tcp_keepalive_probes = 6       # 在发送 keepalive 心跳包后，如果没有接收到对端的确认包。则每间隔 tcp_keepalive_intvl 秒继续发送 keepalive 心跳包，一共发送 6 次，默认 9 次
+net.ipv4.tcp_keepalive_probes = 9       # 在发送 keepalive 心跳包后，如果没有接收到对端的确认包。则每间隔 tcp_keepalive_intvl 秒继续发送 keepalive 心跳包，一共发送 9 次，默认 9 次
 
 # 载入 sysctl 配置文件（重载内核配置，使上述改动生效）
 sysctl -p
 ```
-上述改动的意思就是，如果 TCP keepalive 保活功能开启，那么 TCP 连接建立后，每隔 30s 发送一个心跳包，如果对端没有回复，则继续每隔 10s 发送一次心跳包，重复 6 次如果还没有回复，则断开 TCP 连接
+上述改动的意思就是，如果 TCP keepalive 保活功能开启，那么 TCP 连接建立后，每隔 15s 发送一个心跳包，如果对端没有回复，则继续每隔 10s 发送一次心跳包，重复 9 次如果还没有回复，则断开 TCP 连接
 >只要 TCP 两端之间有数据包交换，则各自都会重置该连接上次接收数据包的时间，如此 keepalive 心跳包就可以不断的刷新这个时间，来避免超时，可以在 C/S 的任意一端或两端都开启 keepalive 保活功能
 
 ## 使用说明
